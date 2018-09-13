@@ -1,18 +1,18 @@
 
 {
-  "name": "VueLog4js",
+  "name": "vue-log4js",
   "license": "Apache-2.0",
   "author": "partimer",
   "description": "VueJS plugin wrapper for Log4js-Node javascript logging",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/partimer/VueLog4js.git"
+    "url": "git+https://github.com/partimer/vue-log4js.git"
   },
   "bugs": {
-    "url": "https://github.com/partimer/VueLog4js.git/issues"
+    "url": "https://github.com/partimer/vue-log4js.git/issues"
   },
-  "homepage": "https://github.com/partimer/VueLog4js.git#readme",
+  "homepage": "https://github.com/partimer/vue-log4js.git#readme",
   "keywords": [
     "logging",
     "log",
