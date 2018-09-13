@@ -1,6 +1,6 @@
 
 {
-  "name": "log4js-vue-log-bus",
+  "name": "VueLog4js",
   "license": "Apache-2.0",
   "author": "partimer",
   "description": "VueJS plugin wrapper for Log4js-Node javascript logging",
