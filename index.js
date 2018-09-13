@@ -13,11 +13,10 @@ var internalLogger;
 // Internal Options so they can be updated
 var internalOptions =   {
     appenders: {
-        console:    {type: 'console'},
-        logbus:     {type: 'log4js-vue-log-bus'}
+        console:    {type: 'console'}
     },
     categories: {
-        default: { appenders: ['console', 'logbus'], level: 'all' }
+        default: { appenders: ['console'], level: 'all' }
     },
     disableClustering: true
 };
