@@ -1,0 +1,31 @@
+
+{
+  "name": "log4js-vue-log-bus",
+  "license": "Apache-2.0",
+  "author": "partimer",
+  "description": "VueJS plugin wrapper for Log4js-Node javascript logging",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/partimer/VueLog4js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/partimer/VueLog4js.git/issues"
+  },
+  "homepage": "https://github.com/partimer/VueLog4js.git#readme",
+  "keywords": [
+    "logging",
+    "log",
+    "log4js",
+    "node",
+    "vue",
+    "vuejs"
+  ],
+  "devDependencies": {
+  },
+  "dependencies": {
+    "log4js": "^3.0.5",
+    "vue": "^2.5.17",
+    "lodash": "^4.17.11",
+  }
+}
