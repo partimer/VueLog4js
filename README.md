@@ -4,7 +4,7 @@ VueJS plugin wrapper for Log4js-Node javascript logging
 
 
 ```js
-logLevels :  ['debug', 'info', 'warn', 'error', 'fatal']
+logLevels :  ['mark', 'trace', 'debug', 'info', 'warn', 'error', 'fatal']
 ```
 
 
