@@ -1,4 +1,4 @@
-# VueLog4js
+# vue-log4js
 VueJS plugin wrapper for Log4js-Node javascript logging
 
 
@@ -15,7 +15,7 @@ This project uses [node](http://nodejs.org) and [npm](https://npmjs.com).
 https://www.npmjs.com/package/VueLog4js
 
 ```sh
-$ npm install https://github.com/partimer/VueLog4js.git --save
+$ npm install https://github.com/partimer/vue-log4js.git --save
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ Configuration options are passed through to log4js.
 #### Code example
 
 ```js
-import VueLogger from 'vuejs-logger';
+import VueLog4js from 'vue-log4js';
 const isProduction = process.env.NODE_ENV === 'production';
  
 var options =   {
