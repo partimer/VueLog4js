@@ -5,8 +5,6 @@
 import Log4js from 'log4js';
 import _ from 'lodash';
 
-const deepClone = require('rfdc')({ proto: true });
-
 // Internal reference for self logging
 var internalLogger;
 
