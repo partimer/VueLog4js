@@ -19,39 +19,61 @@ var internalOptions =   {
     disableClustering: true
 };
 
+// logger objects
+export const loggerRegistry = {};
     
 // Appends category to existing configuration -- returns the logger
-const logRegister = function (category,level,appenders) {
-    // Only do something if a category is specified
-    if (typeof category !== 'undefined' ) {
-        // Append category -- Deep copy default options
-        internalOptions.categories[category] = _.cloneDeep(internalOptions.categories.default);
-        
-        // Allow level to be overriden
-        if (typeof level !== 'undefined' ) {
-            internalOptions.categories[category].level=level;
-        }
-        
-        // Allow the appenders to be overriden
-        // Appender must already exist in global config
-        if (typeof appenders !== 'undefined' ) {
-            internalOptions.categories[category].appenders=appenders;
-        }        
-        
-        // ReConfigure Log4js
-        Log4js.configure(internalOptions);
-        
-        // Note the Category was created
-        internalLogger.info('Category logger registered! ', category);
+export const logRegister = function (category,level,appenders) {
+    // Assume default category
+    if (typeof category === 'undefined' ) {
+        category = 'default';
     }
-    return Log4js.getLogger(category);
+    
+    // Append category -- Deep copy default options
+    internalOptions.categories[category] = _.cloneDeep(internalOptions.categories.default);
+
+    // Allow level to be overriden
+    if (typeof level !== 'undefined' ) {
+        internalOptions.categories[category].level=level;
+    }
+
+    // Allow the appenders to be overriden
+    // Appender must already exist in global config
+    if (typeof appenders !== 'undefined' ) {
+        internalOptions.categories[category].appenders=appenders;
+    }        
+
+    // ReConfigure Log4js
+    Log4js.configure(internalOptions);
+
+    // new loggers incase of updates
+    loggerRegistry[category] = Log4js.getLogger(category);
+    // Note the Category was created
+    loggerRegistry[category].info('Category logger registered! ', category);
+     
+    return loggerRegistry[category];
 } // end logRegister()
     
 // Get the current catagories
-const logCategories = function() {
-    return internalOptions.categories;
+export const logCategories = function() {
+    let retVal = {};
+    Object.keys(internalOptions['categories']).forEach( function (curKey) {
+        retVal[curKey] = loggerRegistry[curKey].level();
+    });
 } // end getCategory()
-    
+
+export const logLevel = function(level, category) {
+    if( typeof category !== 'undefined' ) {
+        internalOptions['categories'][category]['level'] = level;
+        loggerRegistry[category].level(level);
+    } else {
+        
+        Object.keys(internalOptions['categories']).forEach( function (curKey) {
+            internalOptions['categories'][curKey]['level'] = level;
+            loggerRegistry[curKey].level(level);
+        });
+    }
+}
 
 // Plugin object
 const VueLog4js = {
@@ -85,6 +107,7 @@ const VueLog4js = {
         // Attach functions
         Vue.prototype.$logRegister   = logRegister;
         Vue.prototype.$logCategories = logCategories;
+        Vue.prototype.$logLevel = logLevel;
         
         // Never do heavy lifting in a mounted()
         Vue.mixin({
