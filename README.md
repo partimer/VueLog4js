@@ -93,3 +93,25 @@ new Vue({
         this.$log.fatal('test')
     }
 });
+```
+#### Dynamic category with plain Javascript
+
+```js
+import VueLog4js, {logStorage, logVuex, logRegister, logConfig} from 'vue-log4js';
+
+// Immediately config VueLog4js so it is configured and available during JS import
+logConfig({
+    appenders: {
+        console:    {type: 'console'}
+    },
+    categories: {
+        default: { appenders: ['console'], level: 'all' }
+    },
+    disableClustering: true
+})
+
+// Automatically creates the category 'myDynamicJSCategory' with values of the 'default' category
+const logger = logRegister('myDynamicJSCategory')
+
+logger.debug('logging from javascript')
+```
