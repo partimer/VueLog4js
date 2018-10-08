@@ -75,7 +75,6 @@ function externalFunction() {
 #### Dynamically Register new Category
 
 ```js
-var myLogger = Vue.$logRegister('cheese');
 new Vue({
     data() {
         return {
@@ -84,15 +83,17 @@ new Vue({
         }
     },
     created() {
-        this.$log.mark('test', this.a, 123)
-        this.$log.trace('test', this.b, 456)
-        this.$log.debug('test', this.a)
-        this.$log.info('test', this.b)
-        this.$log.warn('test')
-        this.$log.error('test')
-        this.$log.fatal('test')
+        var myVueLogger = this.$logRegister('myNewLogger')
+        myVueLogger.mark('test', this.a, 123)
+        myVueLogger.trace('test', this.b, 456)
+        myVueLogger.debug('test', this.a)
+        myVueLogger.info('test', this.b)
+        myVueLogger.warn('test')
+        myVueLogger.error('test')
+        myVueLogger.fatal('test')
     }
 });
+
 ```
 #### Dynamic category with plain Javascript
 
@@ -114,4 +115,49 @@ logConfig({
 const logger = logRegister('myDynamicJSCategory')
 
 logger.debug('logging from javascript')
+
+
+```
+
+#### Sync config and loggers with a Vuex instance
+```js
+import VueLog4js, {logStorage, logVuex, logRegister, logConfig} from 'vue-log4js';
+Vue.use(VueLog4js)
+
+// import Vuex Store
+import Vuex from 'vuex';
+
+const logging = {
+    namespaced: true,
+    state: {
+        config: {},
+        loggerRegistry: {}
+    },
+    getters: {
+        config: (state) => state.config,
+        loggerRegistry: (state) => state.loggerRegistry,
+    },
+    mutations: {
+        update_config (state, config) {
+            state.config = config
+        },
+        update_loggerRegistry (state, payload) {
+        },
+    }
+}
+
+const store = new Vuex.Store({
+    modules: {
+        log: logging
+    }
+})
+
+// Tell VueLog4j to update the Vuex
+logVuex(    {
+        default: {
+            store: store,
+            configMutate: 'log/update_config',
+            loggerMutate: 'log/update_loggerRegistry'
+        }
+})
 ```
