@@ -6,59 +6,26 @@ import Log4js from 'log4js'
 import _ from 'lodash'
 
 // Internal reference for self logging
-var internalLogger
-
-// Internal Options so they can be updated
-/*var config =   {
-    appenders: {
-        console:    {type: 'console'}
-    },
-    categories: {
-        default: { appenders: ['console'], level: 'all' }
-    },
-    disableClustering: true,
-
-}*/
-const config =   {
-    appenders: {
-        console:    {type: 'console'},
-        logbus:     {type: 'log4js-vue-log-bus'}
-    },
-    categories: {
-        default: { appenders: ['console', 'logbus'], level: 'all' }
-    },
-    disableClustering: true
-};
-/*{
-    appenders: {
-        console:    {type: 'console'}
-    },
-    categories: {
-        default: { appenders: ['console'], level: 'all' }
-    },
-    disableClustering: true,
-}*/
+var defaultLogger
 
 /*
- *
- * The following should be configured AFTER the initial install(options is called)
-    vuex: {
-        default: {
-            store: store,
-            configMutate: 'log/update_config',
-            loggerMutate: 'log/update_loggerRegistry'
-        }
-    },
-    localForage: undefined // localForage Object
-    */
+ * Same defaults as log4js.js::getLogger()
+ * 
+ * Since config is const, reassignments of config are verboten!
+ * Even if you did direct reassignments this exposes races conditions
+ * when syncing to Vuex or localForage
+ * 
+ */
+const config = {
+      appenders: { out: { type: 'stdout' } },
+      categories: { default: { appenders: ['out'], level: 'OFF' } }
+}
 
 // logger objects
 const loggerRegistry = {}
 
 // Vuex communication objects
-const storeRegistry = {}
-const configMutationNameRegistry = {}
-const loggersMutationNameRegistry = {}
+const vuexRegistry = {}
 
 // Persistence objects
 var storage = undefined
@@ -92,49 +59,11 @@ export const simpleToLog4jsOptions = function( category='default', level, append
 }
 
 /*
- * Since config is const, reassignments of config are verboten!
- * Even if you did direct reassignments this exposes races conditions
- * when syncing to Vuex or localForage
+ * Appends category to existing configuration -- returns the logger
+ * 
+
  *  
  */
-// export const mergIntoConfig = function (configObj, newParts ) {
-// 
-// //     if(typeof newParts.categories !== 'undefined')
-// //         Object.keys(newParts.categories).forEach( (category) => {
-// //             config.categories[category] = newParts.categories[category]
-// //         })
-// //     if(typeof newParts.appenders !== 'undefined')
-// //         Object.keys(newParts.appenders).forEach( (appender) => {
-// //             config.appenders[appender] = newParts.appenders[appender]
-// //         })
-//     Object.keys(newParts).forEach( (key1) => {
-// 
-//             
-//         // Check if need to deeper merge or handle Array
-// //         if( Array.isArray(newParts[key1]) ) {
-// //             // ensure the proprty exists on configObj for assignment
-// //             if( typeof configObj[key1] === 'undefined' )
-// //                 configObj[key1] = []
-// //             
-// //             // ok just assign it
-// //             configObj[key1] = newParts[key1]          
-// //         } else 
-//         if( typeof newParts[key1] === 'object' && !Array.isArray(newParts[key1]) ) {
-//             // ensure the proprty exists on configObj for assignment
-//             if( typeof configObj[key1] === 'undefined' )
-//                 configObj[key1] = {}
-//             
-//             // recursively merge it
-//             mergIntoConfig(configObj[key1], newParts[key1])
-//         } else {
-//             // ok just assign it
-//             configObj[key1] = newParts[key1]
-//         }
-//     })
-//     return config
-// }
-
-// Appends category to existing configuration -- returns the logger
 export const logRegister = function (category='default', level, appenders) {
     // Generate a log4js categories line from the parameters
     let newParts = simpleToLog4jsOptions(category, level, appenders)
@@ -156,21 +85,29 @@ export const logRegister = function (category='default', level, appenders) {
 
 /*
  * Bridges plugin into vuex
- */
-export const logVuex = function ( store, configMutationName, loggerRegistryMutationName, storeName='default' ) {
-    storeRegistry[storeName] = store
-    configMutationNameRegistry[storeName] = configMutationName
-    loggersMutationNameRegistry[storeName] = loggerRegistryMutationName    
+ *
+ * The following should be configured AFTER the initial install(options is called)
+    {
+        default: {
+            store: store,
+            configMutate: 'log/update_config',
+            loggerMutate: 'log/update_loggerRegistry'
+        }
+    }
+    localForage: undefined // localForage Object
+    store, configMutationName, loggerRegistryMutationName, storeName='default'
+    */
+export const logVuex = function ( vuexOptions ) {
+    _.merge(vuexRegistry, vuexOptions)
 }
 
 /*
- * Kinda brute force but needs to re-assign the object to trigger mutation?
+ * Send the possibly updated config
  */
 const vuexCommitConfig = function (category) {
-    //TODO make a version that only updates the new loggers
-    Object.keys(storeRegistry).forEach( (storeName) => {
-        if( typeof configMutationNameRegistry[storeName] !== 'undefined' )
-            storeRegistry[storeName].commit(configMutationNameRegistry[storeName], config)      
+    Object.keys(vuexRegistry).forEach( (storeName) => {
+        if( typeof vuexRegistry[storeName].configMutate !== 'undefined' )
+            vuexRegistry[storeName].store.commit(vuexRegistry[storeName].configMutate, config)      
     })
 }
 
@@ -179,9 +116,9 @@ const vuexCommitConfig = function (category) {
  */
 const vuexCommitLogger = function (category) {
     //TODO make a version that only updates the new loggers
-    Object.keys(storeRegistry).forEach( (storeName) => {
-        if( typeof loggersMutationNameRegistry[storeName] !== 'undefined' )
-            storeRegistry[storeName].commit(loggersMutationNameRegistry[storeName], loggerRegistry)        
+    Object.keys(vuexRegistry).forEach( (storeName) => {
+        if( typeof vuexRegistry[storeName].loggerMutate !== 'undefined' )
+            vuexRegistry[storeName].store.commit(vuexRegistry[storeName].loggerMutate, loggerRegistry)      
     })
 }
 
@@ -278,12 +215,12 @@ export const logCategories = function() {
 export const logLevel = function(level, category) {
     if( typeof category !== 'undefined' ) {
         config['categories'][category]['level'] = level
-        loggerRegistry[category].level(level)
+        loggerRegistry[category].level = level
     } else {
         
         Object.keys(config['categories']).forEach( function (curKey) {
             config['categories'][curKey]['level'] = level
-            loggerRegistry[curKey].level(level)
+            loggerRegistry[curKey].level = level
         })
     }
 }
@@ -305,10 +242,10 @@ const VueLog4js = {
         }
 
         // Configure Log4js
-        Log4js.configure(config)
+        logConfig(config)
         
-        // Get the logger
-        Vue.$log  = internalLogger = Log4js.getLogger()
+        // Get the default logger
+        Vue.$log  = defaultLogger = Log4js.getLogger()
         
         // Attach logger to Vue instance
         Vue.prototype.$log = Vue.$log
