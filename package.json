@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "author": "partimer",
   "description": "VueJS plugin wrapper for Log4js-Node javascript logging",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/partimer/vue-log4js.git"
